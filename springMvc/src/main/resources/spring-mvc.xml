@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+       http://www.springframework.org/schema/task
+       http://www.springframework.org/schema/task/spring-task.xsd">
+
+
+    <!-- 扫描web相关的bean -->
+    <context:component-scan base-package="com.wx.controller"/>
+
+    <!-- 开启SpringMVC注解模式 -->
+    <mvc:annotation-driven/>
+
+    <!-- 静态资源默认servlet配置 -->
+    <mvc:default-servlet-handler/>
+    <!--自动任务扫描配置-->
+    <task:annotation-driven/>
+    <context:component-scan base-package="com.wx.component"/>
+
+    <mvc:resources mapping="/static/**" location="/WEB-INF/static/"/>
+
+    <!-- 模板解析器  -->
+    <bean id="templateResolver" class="org.thymeleaf.templateresolver.ServletContextTemplateResolver">
+        <property name="prefix" value="/WEB-INF/templates/"/>
+        <property name="suffix" value=".html"/>
+        <property name="templateMode" value="HTML5"/>
+        <property name="cacheable" value="false"/>
+        <property name="characterEncoding" value="UTF-8"/>
+    </bean>
+
+    <bean id="templateEngine" class="org.thymeleaf.spring4.SpringTemplateEngine">
+        <property name="templateResolver" ref="templateResolver"/>
+    </bean>
+
+    <bean class="org.thymeleaf.spring4.view.ThymeleafViewResolver">
+        <property name="templateEngine" ref="templateEngine"/>
+        <property name="characterEncoding" value="UTF-8"/>
+    </bean>
+
+    <!--扫描包下所有的被标注的类-->
+    <context:component-scan base-package="com.wx.domain"/>
+
+    <!--配置验证器-->
+    <bean id="myvalidator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+        <property name="providerClass" value="org.hibernate.validator.HibernateValidator"/>
+    </bean>
+
+    <!--绑定验证器-->
+    <mvc:annotation-driven validator="myvalidator"/>
+    <!-- 配置拦截器链 -->
+    <!--<mvc:interceptors>
+        &lt;!&ndash; 配置第1个拦截器 &ndash;&gt;
+        <mvc:interceptor>
+            &lt;!&ndash; 指定拦截路径，不在拦截路径之内的将不予处理，即拦截器根本就不运行 &ndash;&gt;
+            <mvc:mapping path="/index"/>
+            <mvc:mapping path="/user/password.do"/>
+            &lt;!&ndash; 指定拦截器类 &ndash;&gt;
+            <bean class="com.wx.Interceptor.LoginInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>-->
+
+    <!-- 自定义的实现类 -->
+    <bean id="exceptionHandler" class="com.wx.error.CustomExceptionHandler"/>
+    <!-- 默认的实现类注入 -->
+
+    <!-- 配置文件上传 -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!-- 指定默认的编码格式 -->
+        <property name="defaultEncoding" value="UTF-8"/>
+        <!-- 指定允许上传的文件大小，单位Byte -->
+        <property name="maxUploadSize" value="5120000000000"/>
+    </bean>
+
+    <!-- 国际化 -->
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basenames" value="i18n.message"></property>
+    </bean>
+
+    <!-- 国际化操作拦截器如果采用基于(session/cookie)则必须配置 -->
+    <mvc:interceptors>
+        <bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"></bean>
+    </mvc:interceptors>
+
+
+    <!-- 配置LocalResolver用来获取本地化语言 -->
+    <bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver"></bean>
+    <!-- 配置LocaleChanceInterceptor拦截器 -->
+    <mvc:interceptors>
+        <bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"/>
+    </mvc:interceptors>
+
+
+</beans>

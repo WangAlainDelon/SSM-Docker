@@ -1,0 +1,47 @@
+version: "3"
+services:
+  mysql: 
+    container_name: mysql
+    build: ./docker/mysql
+    image: javatest/mysql:1.0
+    hostname: mysql
+    ports:
+    - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    expose:
+    - "3306"
+    networks:
+    - "c7nNetwork"
+  app:
+    container_name: app
+    image: tomcat:8
+    volumes:
+    - "./target/springMvc.war:/usr/local/tomcat/webapps/springMvc.war"
+    hostname: app
+    expose:
+    - "8080"
+    ports:
+    - "8080:8080"
+    entrypoint:
+      - "catalina.sh"
+      - "run"
+    environment:
+      TITLE: aaa
+      DESCRIPTION: bbb
+      LANGUAGEID: 12
+      IP: "192.168.237.130"
+      PORT: "3306"
+      DRIVERCLASSNAME: "com.mysql.jdbc.Driver"
+      URL: "jdbc:mysql://92.168.237.130:3306/sakila?useSSL=false"
+      USERNAME: "root"
+      PASSWORD: "root"
+    networks:
+    - "c7nNetwork"
+    links:
+    - mysql
+
+
+networks:
+  c7nNetwork:
+    driver: bridge
